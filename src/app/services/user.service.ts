@@ -7,6 +7,7 @@ import { catchError, map, tap } from 'rxjs/operators'
 import { Observable, of } from 'rxjs';
 import { Router } from '@angular/router';
 import { User } from '../models/user.model';
+import { LoadUsers } from '../interfaces/load-users.interface';
 
 declare const google: any;
 const base_url = environment.base_url;
@@ -26,6 +27,10 @@ export class UserService {
 
   get uid(): string {
     return this.user?.uid || ''
+  }
+
+  get headers() {
+    return {headers:{'x-token':this.token}}
   }
 
   tokenValidation(): Observable<boolean>{
@@ -61,9 +66,7 @@ export class UserService {
       ...data,
       role: this.user!.role!
     }
-    return this.http.put(`${ base_url }/users/${this.uid}`, data, {
-      headers: { 'x-token' : this.token }
-    });
+    return this.http.put(`${ base_url }/users/${this.uid}`, data, this.headers);
   }
 
   login ( formData: LoginForm ){
@@ -89,5 +92,32 @@ export class UserService {
     google.accounts.id.revoke( 'gonxxamd@gmail.com', () => {
       this.router.navigateByUrl('/login')
     })
+  }
+
+  loadUsers( desde: number = 0 ){
+    const url = `${base_url}/users/?desde=${desde}`;
+    return this.http.get<LoadUsers>(url , this.headers)
+      .pipe(
+        map( resp => {
+          const users = resp.users.map(
+            user => new User(user.name, user.email, '', user.img, user.google, user.role, user.uid)
+          );
+          return {
+            total: resp.total,
+            users
+          }
+        })
+      );
+  }
+
+  deleteUser( user: User ){
+    const url = `${base_url}/users/${user.uid}`;
+    return this.http.delete(url , this.headers)
+    
+  }
+
+  updateAndSaveUser( user: User ){
+
+    return this.http.put(`${ base_url }/users/${user.uid}`, user, this.headers);
   }
 }
