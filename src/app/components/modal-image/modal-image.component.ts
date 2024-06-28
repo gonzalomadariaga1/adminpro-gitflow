@@ -45,7 +45,7 @@ export class ModalImageComponent {
 
     this.fileUploadService.updateImage( this.imageUpdate!, type! , id! )
       .then( img => {
-        Swal.fire('Guardado','Imagen actualizada con','success')
+        Swal.fire('Guardado','Imagen actualizada con éxito.','success')
         this.modalImageService.newImage.emit(img)
         this.closeModal()
       })
