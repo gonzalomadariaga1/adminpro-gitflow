@@ -3,6 +3,8 @@ import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment.development';
 import { map } from 'rxjs';
 import { User } from '../models/user.model';
+import { Hospital } from '../models/hospital.model';
+import { Doctor } from '../models/doctor.model';
 
 const base_url = environment.base_url
 @Injectable({
@@ -27,6 +29,14 @@ export class SearchsService {
     )
   }
 
+  private transformHospital ( results : any[] ): Hospital[] {
+    return results;
+  }
+
+  private transformDoctor ( results : any[] ): Doctor[] {
+    return results;
+  }
+
   search (type: 'users'|'doctors'|'hospitals' , term: string){
 
     const url = `${base_url}/search/collection/${type}/${term}`;
@@ -37,6 +47,12 @@ export class SearchsService {
 
             case 'users':
             return this.transformUser(resp.results)
+
+            case 'hospitals':
+            return this.transformHospital(resp.results)
+
+            case 'doctors':
+            return this.transformDoctor(resp.results)
             
           
             default:
