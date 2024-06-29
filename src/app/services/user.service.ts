@@ -25,12 +25,21 @@ export class UserService {
     return localStorage.getItem('token') || '';
   }
 
+  get role() : 'ADMIN_ROLE' | 'USER_ROLE' {
+    return this.user.role! ;
+  }
+
   get uid(): string {
     return this.user?.uid || ''
   }
 
   get headers() {
     return {headers:{'x-token':this.token}}
+  }
+
+  setLocalStorage(token: string , menu: any){
+    localStorage.setItem('token' , token );
+    localStorage.setItem('menu' , JSON.stringify(menu) );
   }
 
   tokenValidation(): Observable<boolean>{
@@ -42,7 +51,7 @@ export class UserService {
 
         const { email, google, name, role, uid, img = '' } = resp.user 
         this.user = new User( name, email, '', img, google, role, uid )
-        localStorage.setItem('token' , resp.token );
+        this.setLocalStorage(resp.token , resp.menu )
         return true;
 
       }),
@@ -55,7 +64,7 @@ export class UserService {
     return this.http.post(`${ base_url }/users`, formData )
       .pipe(
         tap( (resp:any) => {
-          localStorage.setItem('token' , resp.token)
+          this.setLocalStorage(resp.token , resp.menu )
         })
       )
     
@@ -73,7 +82,7 @@ export class UserService {
     return this.http.post(`${ base_url }/login`, formData )
       .pipe(
         tap( (resp:any) => {
-          localStorage.setItem('token' , resp.token)
+          this.setLocalStorage(resp.token , resp.menu )
         })
       )
   }
@@ -82,13 +91,14 @@ export class UserService {
     return this.http.post(`${ base_url }/login/google`, {token} )
     .pipe(
       tap( (resp:any) => {
-        localStorage.setItem('token' , resp.token)
+        this.setLocalStorage(resp.token , resp.menu )
       })
     )
   }
 
   logout(){
     localStorage.removeItem('token')
+    localStorage.removeItem('menu')
     google.accounts.id.revoke( 'gonxxamd@gmail.com', () => {
       this.router.navigateByUrl('/login')
     })

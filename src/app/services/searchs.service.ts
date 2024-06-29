@@ -62,4 +62,9 @@ export class SearchsService {
       )
 
   }
+
+  searchGlobal( term: string){
+    const url = `${base_url}/search/${term}`;
+    return this.http.get(url , this.headers)
+  }
 }
